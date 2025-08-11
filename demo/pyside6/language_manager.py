@@ -91,7 +91,7 @@ class LanguageManager:
             "multiline_text": {Language.CHINESE: "启用多行文本", Language.ENGLISH: "Enable multiline text"},
 
             # Font preset buttons
-            "small_font": {Language.CHINESE: "小字体 (8pt)", Language.ENGLISH: "Small (8pt)"},
+            "small_font": {Language.CHINESE: "小字体 (10pt)", Language.ENGLISH: "Small (10pt)"},
             "medium_font": {Language.CHINESE: "中等字体 (12pt)", Language.ENGLISH: "Medium (12pt)"},
             "large_font": {Language.CHINESE: "大字体 (18pt)", Language.ENGLISH: "Large (18pt)"},
 
