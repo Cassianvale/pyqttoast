@@ -36,8 +36,6 @@ class Window(QMainWindow):
         # Create UI layout
         self._setup_ui()
 
-
-
     def _setup_ui(self) -> None:
         """Setup the user interface."""
         # Create main layout with language toggle
@@ -80,8 +78,6 @@ class Window(QMainWindow):
         central_widget.setLayout(main_layout)
         self.setCentralWidget(central_widget)
         self.setFocus()
-
-
 
     def toggle_language(self) -> None:
         """Toggle between Chinese and English languages and update all UI elements."""
@@ -430,7 +426,6 @@ class Window(QMainWindow):
         font_family_layout = QHBoxLayout()
         font_family_layout.addWidget(self.font_family_label)
         font_family_layout.addWidget(self.font_family_dropdown)
-        font_family_layout.addStretch()
 
         font_presets_layout = QHBoxLayout()
         font_presets_layout.addWidget(self.font_presets_label)
