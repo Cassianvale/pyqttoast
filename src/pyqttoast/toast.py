@@ -18,7 +18,7 @@ class Toast(QDialog):
     __maximum_on_screen = 3
     __spacing = 10
     __offset_x = 20
-    __offset_y = 45
+    __offset_y = 50
     __position_relative_to_widget = None
     __move_position_with_widget = True
     __always_on_main_screen = False
@@ -74,11 +74,13 @@ class Toast(QDialog):
         self.__text_section_margins = QMargins(0, 0, 15, 0)
         self.__close_button_margins = QMargins(0, -8, 0, -8)
         self.__text_section_spacing = 8
+        self.__multiline = False
 
         self.__elapsed_time = 0
         self.__fading_out = False
         self.__used = False
         self.__watched_widgets = []
+        self.__manual_duration_bar_value = None  # Used to track manually set progress value
 
         # Window settings
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -283,6 +285,8 @@ class Toast(QDialog):
     def hide(self):
         """Start hiding process of the toast notification"""
 
+        self.__used = True
+
         if not self.__fading_out:
             self.__fading_out = True
             if self.__duration != 0:
@@ -309,9 +313,6 @@ class Toast(QDialog):
             self.__elapsed_time = 0
             self.__fading_out = False
 
-            # Emit signal
-            self.closed.emit()
-
             # Update every other currently shown notification
             for toast in Toast.__currently_shown:
                 toast.__update_position_y()
@@ -322,8 +323,14 @@ class Toast(QDialog):
             timer.timeout.connect(Toast.__show_next_in_queue)
             timer.start(self.__fade_in_duration)
 
+            # Emit signal
+            self.closed.emit()
+
     def __update_duration_bar(self):
         """Update the duration bar chunk with the elapsed time"""
+
+        # Clear manually set progress value
+        self.__manual_duration_bar_value = None
 
         self.__elapsed_time += DURATION_BAR_UPDATE_INTERVAL
 
@@ -331,9 +338,22 @@ class Toast(QDialog):
             self.__duration_bar_timer.stop()
             return
 
-        new_chunk_width = math.floor(self.__duration_bar_container.width()
-                                     - self.__elapsed_time / self.__duration
-                                     * self.__duration_bar_container.width())
+        new_chunk_width = math.floor(
+            self.__duration_bar_container.width()
+            - self.__elapsed_time / self.__duration * self.__duration_bar_container.width()
+        )
+        self.__duration_bar_chunk.setFixedWidth(new_chunk_width)
+
+    def __set_duration_bar(self, fraction):
+        """Set the width of the duration bar chunk with the specified fraction"""
+
+        if self.__duration_bar_timer.isActive():
+            self.__duration_bar_timer.stop()
+
+        # Save manually set progress value
+        self.__manual_duration_bar_value = fraction
+
+        new_chunk_width = math.floor(fraction * self.__duration_bar_container.width())
         self.__duration_bar_chunk.setFixedWidth(new_chunk_width)
 
     def __update_position_xy(self, animate: bool = True):
@@ -497,9 +517,26 @@ class Toast(QDialog):
         if self.__title == '' or self.__text == '':
             text_section_spacing = 0
 
-        text_section_height = (self.__text_section_margins.top()
-                               + title_height + text_section_spacing
-                               + text_height + self.__text_section_margins.bottom())
+        if self.__multiline:
+            self.__title_label.setWordWrap(True)
+            self.__text_label.setWordWrap(True)
+            if self.__title != "":
+                title_height = self.__title_label.sizeHint().height()
+                title_width = self.__title_label.sizeHint().width()
+            if self.__text != "":
+                text_height = self.__text_label.sizeHint().height()
+                text_width = self.__text_label.sizeHint().width()
+        else:
+            self.__title_label.setWordWrap(False)
+            self.__text_label.setWordWrap(False)
+
+        text_section_height = (
+            self.__text_section_margins.top()
+            + title_height
+            + text_section_spacing
+            + text_height
+            + self.__text_section_margins.bottom()
+        )
 
         # Calculate duration bar height
         duration_bar_height = 0 if not self.__show_duration_bar else self.__duration_bar_container.height()
@@ -801,7 +838,16 @@ class Toast(QDialog):
             self.__duration_bar_container.setFixedWidth(width)
             self.__duration_bar_container.move(0, height - duration_bar_height)
             self.__duration_bar.setFixedWidth(width)
-            self.__duration_bar_chunk.setFixedWidth(width)
+
+            # Set the width of the duration bar chunk
+            if self.__manual_duration_bar_value is not None:
+                # If there's a manually set progress value, use it
+                chunk_width = math.floor(self.__manual_duration_bar_value * width)
+                self.__duration_bar_chunk.setFixedWidth(chunk_width)
+            else:
+                # Otherwise set to full width (default behavior)
+                self.__duration_bar_chunk.setFixedWidth(width)
+
             self.__duration_bar_container.setVisible(True)
         else:
             self.__duration_bar_container.setVisible(False)
@@ -1418,6 +1464,12 @@ class Toast(QDialog):
             return
         self.__duration_bar_color = color
 
+    def setDurationBarValue(self, fraction: float):
+        """Set the width of the duration bar with the specified fraction
+        :param fraction: The fraction of the total width from 0.0 to 1.0
+        """
+        self.__set_duration_bar(fraction)
+
     def getTitleFont(self) -> QFont:
         """Get the font of the title
 
@@ -1924,6 +1976,22 @@ class Toast(QDialog):
             return
         self.__text_section_spacing = spacing
 
+    def isMultiline(self) -> bool:
+        """Get whether multiline text is enabled
+        :return: whether multiline text is enabled
+        """
+
+        return self.__multiline
+
+    def setMultiline(self, on: bool):
+        """Set whether multiline text should be enabled
+        :param on: whether multiline text should be enabled
+        """
+
+        if self.__used:
+            return
+        self.__multiline = on
+
     def applyPreset(self, preset: ToastPreset):
         """Apply a style preset to the toast
 
@@ -2303,7 +2371,7 @@ class Toast(QDialog):
         Toast.__maximum_on_screen = 3
         Toast.__spacing = 10
         Toast.__offset_x = 20
-        Toast.__offset_y = 45
+        Toast.__offset_y = 50
         Toast.__position_relative_to_widget = None
         Toast.__move_position_with_widget = True
         Toast.__always_on_main_screen = False
