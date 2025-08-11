@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import math
+import re
+import webbrowser
 from qtpy.QtGui import QGuiApplication, QScreen
 from qtpy.QtCore import Qt, QPropertyAnimation, QPoint, QTimer, QSize, QMargins, QRect, Signal
 from qtpy.QtGui import QPixmap, QIcon, QFont, QFontMetrics
@@ -10,6 +12,59 @@ from .utils import Utils
 from .icon_utils import IconUtils
 from .drop_shadow import DropShadow
 from .constants import *
+
+
+class ClickableLabel(QLabel):
+    """A QLabel that supports clickable links"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setOpenExternalLinks(True)
+        self.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        self.linkActivated.connect(self._open_link)
+
+    def _open_link(self, url):
+        """Open the clicked link in the default browser"""
+        try:
+            webbrowser.open(url)
+        except Exception:
+            # Fallback if webbrowser fails
+            pass
+
+    def setText(self, text):
+        """Set text and automatically convert URLs to clickable links"""
+        # Convert plain URLs to HTML links
+        linked_text = self._convert_urls_to_links(text)
+        super().setText(linked_text)
+
+    def _convert_urls_to_links(self, text):
+        """Convert URLs in text to HTML links"""
+        # URL regex pattern that matches common URL formats
+        url_pattern = re.compile(
+            r'(?i)\b(?:'
+            r'(?:https?://|www\.)'  # http://, https://, or www.
+            r'(?:[^\s<>"{}|\\^`\[\]]*)'  # domain and path
+            r'|'
+            r'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}'  # domain.tld
+            r'(?:/[^\s<>"{}|\\^`\[\]]*)?'  # optional path
+            r')\b'
+        )
+
+        def replace_url(match):
+            url = match.group(0)
+            # Add protocol if missing
+            if not url.startswith(('http://', 'https://')):
+                if url.startswith('www.'):
+                    full_url = 'https://' + url
+                else:
+                    full_url = 'https://' + url
+            else:
+                full_url = url
+
+            return f'<a href="{full_url}" style="color: #0066cc; text-decoration: underline;">{url}</a>'
+
+        # Replace URLs with HTML links
+        return url_pattern.sub(replace_url, text)
 
 
 class Toast(QDialog):
@@ -106,8 +161,8 @@ class Toast(QDialog):
         # Title label
         self.__title_label = QLabel(self.__toast_widget)
 
-        # Text label
-        self.__text_label = QLabel(self.__toast_widget)
+        # Text label (using ClickableLabel for link support)
+        self.__text_label = ClickableLabel(self.__toast_widget)
 
         # Icon (QPushButton instead of QLabel to get better icon quality)
         self.__icon_widget = QPushButton(self.__toast_widget)
@@ -1507,6 +1562,82 @@ class Toast(QDialog):
             return
         self.__text_font = font
         self.__text_label.setFont(font)
+
+    def getTitleFontSize(self) -> int:
+        """Get the font size of the title
+
+        :return: title font size in points
+        """
+        return self.__title_font.pointSize()
+
+    def setTitleFontSize(self, size: int):
+        """Set the font size of the title
+
+        :param size: new title font size in points
+        """
+        if self.__used:
+            return
+        self.__title_font.setPointSize(size)
+        self.__title_label.setFont(self.__title_font)
+
+    def getTextFontSize(self) -> int:
+        """Get the font size of the text
+
+        :return: text font size in points
+        """
+        return self.__text_font.pointSize()
+
+    def setTextFontSize(self, size: int):
+        """Set the font size of the text
+
+        :param size: new text font size in points
+        """
+        if self.__used:
+            return
+        self.__text_font.setPointSize(size)
+        self.__text_label.setFont(self.__text_font)
+
+    def setFontSize(self, title_size: int, text_size: int = None):
+        """Set the font size for both title and text
+
+        :param title_size: title font size in points
+        :param text_size: text font size in points (if None, uses title_size)
+        """
+        if self.__used:
+            return
+
+        if text_size is None:
+            text_size = title_size
+
+        self.setTitleFontSize(title_size)
+        self.setTextFontSize(text_size)
+
+    def setFontFamily(self, family: str):
+        """Set the font family for both title and text
+
+        :param family: font family name (e.g., 'Arial', 'Times New Roman')
+        """
+        if self.__used:
+            return
+
+        self.__title_font.setFamily(family)
+        self.__text_font.setFamily(family)
+        self.__title_label.setFont(self.__title_font)
+        self.__text_label.setFont(self.__text_font)
+
+    def getTitleFontFamily(self) -> str:
+        """Get the font family of the title
+
+        :return: title font family
+        """
+        return self.__title_font.family()
+
+    def getTextFontFamily(self) -> str:
+        """Get the font family of the text
+
+        :return: text font family
+        """
+        return self.__text_font.family()
 
     def getMargins(self) -> QMargins:
         """Get the margins of the toast content

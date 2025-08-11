@@ -29,10 +29,6 @@ class LanguageManager:
             "static_settings": {Language.CHINESE: "静态设置", Language.ENGLISH: "Static Settings"},
             "toast_presets": {Language.CHINESE: "Toast 预设", Language.ENGLISH: "Toast Presets"},
             "custom_toast": {Language.CHINESE: "自定义 Toast", Language.ENGLISH: "Custom Toast"},
-            "progress_demo": {
-                Language.CHINESE: "增强进度管理演示",
-                Language.ENGLISH: "Enhanced Progress Management Demo",
-            },
             
             # Static settings labels
             "max_on_screen": {Language.CHINESE: "屏幕最大数量:", Language.ENGLISH: "Max on Screen:"},
@@ -84,7 +80,29 @@ class LanguageManager:
             "max_height": {Language.CHINESE: "最大高度:", Language.ENGLISH: "Max Height:"},
             "fade_in_duration": {Language.CHINESE: "淡入持续时间:", Language.ENGLISH: "Fade In Duration:"},
             "fade_out_duration": {Language.CHINESE: "淡出持续时间:", Language.ENGLISH: "Fade Out Duration:"},
+
+            # Font customization labels
+            "title_font_size": {Language.CHINESE: "标题字体大小:", Language.ENGLISH: "Title Font Size:"},
+            "text_font_size": {Language.CHINESE: "文本字体大小:", Language.ENGLISH: "Text Font Size:"},
+            "font_family": {Language.CHINESE: "字体族:", Language.ENGLISH: "Font Family:"},
+            "font_presets": {Language.CHINESE: "字体预设:", Language.ENGLISH: "Font Presets:"},
             
+            # Multiline text
+            "multiline_text": {Language.CHINESE: "启用多行文本", Language.ENGLISH: "Enable multiline text"},
+
+            # Font preset buttons
+            "small_font": {Language.CHINESE: "小字体 (8pt)", Language.ENGLISH: "Small (8pt)"},
+            "medium_font": {Language.CHINESE: "中等字体 (12pt)", Language.ENGLISH: "Medium (12pt)"},
+            "large_font": {Language.CHINESE: "大字体 (18pt)", Language.ENGLISH: "Large (18pt)"},
+
+            # Test features
+            "test_clickable_links": {Language.CHINESE: "测试可点击链接", Language.ENGLISH: "Test Clickable Links"},
+            "clickable_links_title": {Language.CHINESE: "可点击链接测试", Language.ENGLISH: "Clickable Links Test"},
+            "clickable_links_text": {
+                Language.CHINESE: "点击链接测试：https://www.google.com 和 www.github.com 可以直接访问！",
+                Language.ENGLISH: "Click to test: https://www.google.com and www.github.com are clickable links!"
+            },
+
             # Close button positions
             "top": {Language.CHINESE: "顶部", Language.ENGLISH: "Top"},
             "middle": {Language.CHINESE: "中间", Language.ENGLISH: "Middle"},
@@ -121,26 +139,6 @@ class LanguageManager:
             },
             "info_title": {Language.CHINESE: "信息：需要重启。", Language.ENGLISH: "Information: Restart required."},
             "info_text": {Language.CHINESE: "请重启应用程序。", Language.ENGLISH: "Please restart the application."},
-            
-            # Additional UI text
-            "manual_mode": {Language.CHINESE: "手动模式", Language.ENGLISH: "Manual Mode"},
-            "automatic_mode": {Language.CHINESE: "自动模式", Language.ENGLISH: "Automatic Mode"},
-            "progress_mode": {Language.CHINESE: "进度模式:", Language.ENGLISH: "Progress Mode:"},
-            "select_task": {Language.CHINESE: "选择任务:", Language.ENGLISH: "Select Task:"},
-            "manual_progress": {Language.CHINESE: "手动进度:", Language.ENGLISH: "Manual Progress:"},
-            "animated_progress": {Language.CHINESE: "动画进度", Language.ENGLISH: "Animated Progress"},
-            "create_manual_task": {Language.CHINESE: "创建手动任务", Language.ENGLISH: "Create Manual Task"},
-            "create_auto_task": {Language.CHINESE: "创建自动任务", Language.ENGLISH: "Create Auto Task"},
-            "create_bulk_tasks": {Language.CHINESE: "创建3个混合任务", Language.ENGLISH: "Create 3 Mixed Tasks"},
-            "start_all_auto": {Language.CHINESE: "启动所有自动任务", Language.ENGLISH: "Start All Auto Tasks"},
-            "stop_all_auto": {Language.CHINESE: "停止所有自动任务", Language.ENGLISH: "Stop All Auto Tasks"},
-            "start_selected_auto": {Language.CHINESE: "启动选中的自动任务", Language.ENGLISH: "Start Selected Auto"},
-            "stop_selected_auto": {Language.CHINESE: "停止选中的自动任务", Language.ENGLISH: "Stop Selected Auto"},
-            "switch_mode": {Language.CHINESE: "切换选中模式", Language.ENGLISH: "Switch Selected Mode"},
-            "clear_completed": {Language.CHINESE: "清除已完成", Language.ENGLISH: "Clear Completed"},
-            "progress_text": {Language.CHINESE: "进度: {0}%", Language.ENGLISH: "Progress: {0}%"},
-            "no_tasks": {Language.CHINESE: "无任务 - 创建新任务", Language.ENGLISH: "No tasks - Create a new task"},
-            "multiline_text": {Language.CHINESE: "启用多行文本", Language.ENGLISH: "Enable multiline text"},
         }
     
     def get_text(self, key: str) -> str:
