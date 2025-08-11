@@ -19,7 +19,7 @@ class LanguageManager:
     """Manages bilingual text content for the application."""
     
     def __init__(self):
-        self.current_language = Language.CHINESE
+        self.current_language = Language.ENGLISH
         self.translations = {
             # Window and group titles
             "window_title": {
