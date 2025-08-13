@@ -1,1 +1,1 @@
-from .toast import Toast, ToastPreset, ToastIcon, ToastPosition, ToastButtonAlignment
+from .toast import Toast, ToastPreset, ToastIcon, ToastPosition, ToastButtonAlignment, ToastAnimationDirection
