@@ -34,3 +34,13 @@ class ToastButtonAlignment(Enum):
     TOP = 1
     MIDDLE = 2
     BOTTOM = 3
+
+
+class ToastAnimationDirection(Enum):
+    """Animation direction for toast show/hide animations"""
+    AUTO = 0          # Automatic direction based on position (default, backward compatible)
+    FROM_TOP = 1      # Slide in from top, slide out to top
+    FROM_BOTTOM = 2   # Slide in from bottom, slide out to bottom
+    FROM_LEFT = 3     # Slide in from left, slide out to left
+    FROM_RIGHT = 4    # Slide in from right, slide out to right
+    FADE_ONLY = 5     # Pure opacity animation, no position movement

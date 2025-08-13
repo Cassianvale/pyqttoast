@@ -7,7 +7,7 @@ from qtpy.QtGui import QGuiApplication, QScreen
 from qtpy.QtCore import Qt, QPropertyAnimation, QPoint, QTimer, QSize, QMargins, QRect, Signal
 from qtpy.QtGui import QPixmap, QIcon, QFont, QFontMetrics
 from qtpy.QtWidgets import QDialog, QPushButton, QLabel, QGraphicsOpacityEffect, QWidget
-from .toast_enums import ToastPreset, ToastIcon, ToastPosition, ToastButtonAlignment
+from .toast_enums import ToastPreset, ToastIcon, ToastPosition, ToastButtonAlignment, ToastAnimationDirection
 from .utils import Utils
 from .icon_utils import IconUtils
 from .drop_shadow import DropShadow
@@ -201,6 +201,7 @@ class Toast(QDialog):
         self.__fade_in_duration = 250
         self.__fade_out_duration = 250
         self.__reset_duration_on_hover = True
+        self.__animation_direction = ToastAnimationDirection.AUTO
         self.__stay_on_top = True
         self.__border_radius = 0
         self.__background_color = DEFAULT_BACKGROUND_COLOR
@@ -400,33 +401,37 @@ class Toast(QDialog):
             # Calculate position and show (animate position too if not first notification)
             x, y = self.__calculate_position()
 
-            # If not first toast on screen, also do a fade down/up animation
+            # If not first toast on screen, also do a slide animation
             if len(Toast.__currently_shown) > 1:
-                # Calculate offset if predecessor toast is still in fade down / up animation
+                # Calculate offset if predecessor toast is still in animation
                 predecessor_toast = Toast.__currently_shown[Toast.__currently_shown.index(self) - 1]
                 predecessor_target_x, predecessor_target_y = predecessor_toast.__calculate_position()
                 predecessor_target_difference_y = abs(predecessor_toast.y() - predecessor_target_y)
 
-                # Calculate start position of fade down / up animation based on position
-                if (Toast.__position == ToastPosition.BOTTOM_RIGHT
-                        or Toast.__position == ToastPosition.BOTTOM_LEFT
-                        or Toast.__position == ToastPosition.BOTTOM_MIDDLE):
-                    self.move(x, y - int(self.height() / 1.5) - predecessor_target_difference_y)
+                # Calculate start position based on animation direction
+                start_x, start_y = self.__calculate_animation_start_position(x, y, predecessor_target_difference_y)
+                self.move(start_x, start_y)
 
-                elif (Toast.__position == ToastPosition.TOP_RIGHT
-                      or Toast.__position == ToastPosition.TOP_LEFT
-                      or Toast.__position == ToastPosition.TOP_MIDDLE
-                      or Toast.__position == ToastPosition.CENTER):
-                    self.move(x, y + int(self.height() / 1.5) + predecessor_target_difference_y)
-
-                # Start fade down / up animation
+                # Start slide animation
                 self.__cleanup_animation('pos')
                 self.__pos_animation = QPropertyAnimation(self, b"pos")
                 self.__pos_animation.setEndValue(QPoint(x, y))
                 self.__pos_animation.setDuration(self.__fade_in_duration)
                 self.__pos_animation.start()
             else:
-                self.move(x, y)
+                # For first toast, also apply animation if not FADE_ONLY
+                if self.__animation_direction != ToastAnimationDirection.FADE_ONLY:
+                    start_x, start_y = self.__calculate_animation_start_position(x, y, 0)
+                    self.move(start_x, start_y)
+
+                    # Start slide animation
+                    self.__cleanup_animation('pos')
+                    self.__pos_animation = QPropertyAnimation(self, b"pos")
+                    self.__pos_animation.setEndValue(QPoint(x, y))
+                    self.__pos_animation.setDuration(self.__fade_in_duration)
+                    self.__pos_animation.start()
+                else:
+                    self.move(x, y)
 
             # Fade in
             super().show()
@@ -471,8 +476,9 @@ class Toast(QDialog):
             self.__fade_out_animation = None
 
     def __fade_out(self):
-        """Start the fade out animation"""
+        """Start the fade out animation with optional slide out"""
 
+        # Start opacity fade out animation
         self.__cleanup_animation('fade_out')
         self.__fade_out_animation = QPropertyAnimation(self.__opacity_effect, b"opacity")
         self.__fade_out_animation.setDuration(self.__fade_out_duration)
@@ -480,6 +486,19 @@ class Toast(QDialog):
         self.__fade_out_animation.setEndValue(0)
         self.__fade_out_animation.finished.connect(self.__hide)
         self.__fade_out_animation.start()
+
+        # Add slide out animation if not FADE_ONLY
+        if self.__animation_direction != ToastAnimationDirection.FADE_ONLY:
+            current_x, current_y = self.x(), self.y()
+            end_x, end_y = self.__calculate_animation_end_position(current_x, current_y)
+
+            if end_x != current_x or end_y != current_y:
+                self.__cleanup_animation('pos')
+                self.__pos_animation = QPropertyAnimation(self, b"pos")
+                self.__pos_animation.setStartValue(QPoint(current_x, current_y))
+                self.__pos_animation.setEndValue(QPoint(end_x, end_y))
+                self.__pos_animation.setDuration(self.__fade_out_duration)
+                self.__pos_animation.start()
 
     def __cleanup_resources(self):
         """Clean up all resources to prevent memory leaks"""
@@ -698,6 +717,73 @@ class Toast(QDialog):
         y = int(y - DROP_SHADOW_SIZE)
 
         return x, y
+
+    def __calculate_animation_start_position(self, target_x, target_y, predecessor_offset):
+        """Calculate the starting position for slide-in animation based on animation direction
+
+        :param target_x: final x position
+        :param target_y: final y position
+        :param predecessor_offset: offset from predecessor toast animation
+        :return: tuple of (start_x, start_y)
+        """
+
+        # Determine effective animation direction
+        effective_direction = self.__get_effective_animation_direction()
+
+        if effective_direction == ToastAnimationDirection.FROM_TOP:
+            return target_x, target_y + int(self.height() / 1.5) + predecessor_offset
+        elif effective_direction == ToastAnimationDirection.FROM_BOTTOM:
+            return target_x, target_y - int(self.height() / 1.5) - predecessor_offset
+        elif effective_direction == ToastAnimationDirection.FROM_LEFT:
+            return target_x - int(self.width() / 1.5) - predecessor_offset, target_y
+        elif effective_direction == ToastAnimationDirection.FROM_RIGHT:
+            return target_x + int(self.width() / 1.5) + predecessor_offset, target_y
+        else:  # FADE_ONLY or fallback
+            return target_x, target_y
+
+    def __get_effective_animation_direction(self):
+        """Get the effective animation direction, resolving AUTO based on position
+
+        :return: ToastAnimationDirection enum value
+        """
+
+        if self.__animation_direction != ToastAnimationDirection.AUTO:
+            return self.__animation_direction
+
+        # Auto mode: determine direction based on toast position (backward compatibility)
+        if (Toast.__position == ToastPosition.BOTTOM_RIGHT
+                or Toast.__position == ToastPosition.BOTTOM_LEFT
+                or Toast.__position == ToastPosition.BOTTOM_MIDDLE):
+            return ToastAnimationDirection.FROM_BOTTOM
+        elif (Toast.__position == ToastPosition.TOP_RIGHT
+              or Toast.__position == ToastPosition.TOP_LEFT
+              or Toast.__position == ToastPosition.TOP_MIDDLE
+              or Toast.__position == ToastPosition.CENTER):
+            return ToastAnimationDirection.FROM_TOP
+        else:
+            return ToastAnimationDirection.FROM_TOP  # fallback
+
+    def __calculate_animation_end_position(self, current_x, current_y):
+        """Calculate the ending position for slide-out animation based on animation direction
+
+        :param current_x: current x position
+        :param current_y: current y position
+        :return: tuple of (end_x, end_y)
+        """
+
+        # Determine effective animation direction
+        effective_direction = self.__get_effective_animation_direction()
+
+        if effective_direction == ToastAnimationDirection.FROM_TOP:
+            return current_x, current_y + int(self.height() / 1.5)
+        elif effective_direction == ToastAnimationDirection.FROM_BOTTOM:
+            return current_x, current_y - int(self.height() / 1.5)
+        elif effective_direction == ToastAnimationDirection.FROM_LEFT:
+            return current_x - int(self.width() / 1.5), current_y
+        elif effective_direction == ToastAnimationDirection.FROM_RIGHT:
+            return current_x + int(self.width() / 1.5), current_y
+        else:  # FADE_ONLY or fallback
+            return current_x, current_y
 
     def __setup_ui(self):
         """Calculate best toast size and place and move everything correctly"""
@@ -1361,7 +1447,7 @@ class Toast(QDialog):
         return self.__close_button_icon_size
 
     def setCloseButtonIconSize(self, size: QSize):
-        """Get the size of the close button icon
+        """Set the size of the close button icon
 
         :param size: new size
         """
@@ -1482,6 +1568,24 @@ class Toast(QDialog):
         if self.__used:
             return
         self.__fade_out_duration = duration
+
+    def getAnimationDirection(self) -> ToastAnimationDirection:
+        """Get the animation direction of the toast
+
+        :return: animation direction
+        """
+
+        return self.__animation_direction
+
+    def setAnimationDirection(self, direction: ToastAnimationDirection):
+        """Set the animation direction of the toast
+
+        :param direction: new animation direction
+        """
+
+        if self.__used:
+            return
+        self.__animation_direction = direction
 
     def isResetDurationOnHover(self) -> bool:
         """Get whether the duration resets on hover
