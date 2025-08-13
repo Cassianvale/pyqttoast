@@ -17,6 +17,17 @@ from .constants import *
 class ClickableLabel(QLabel):
     """A QLabel that supports clickable links"""
 
+    # Class-level compiled regex pattern for better performance
+    _URL_PATTERN = re.compile(
+        r'(?i)\b(?:'
+        r'(?:https?://|www\.)'  # http://, https://, or www.
+        r'(?:[^\s<>"{}|\\^`\[\]]*)'  # domain and path
+        r'|'
+        r'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}'  # domain.tld
+        r'(?:/[^\s<>"{}|\\^`\[\]]*)?'  # optional path
+        r')\b'
+    )
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setOpenExternalLinks(True)
@@ -39,16 +50,6 @@ class ClickableLabel(QLabel):
 
     def _convert_urls_to_links(self, text):
         """Convert URLs in text to HTML links"""
-        # URL regex pattern that matches common URL formats
-        url_pattern = re.compile(
-            r'(?i)\b(?:'
-            r'(?:https?://|www\.)'  # http://, https://, or www.
-            r'(?:[^\s<>"{}|\\^`\[\]]*)'  # domain and path
-            r'|'
-            r'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}'  # domain.tld
-            r'(?:/[^\s<>"{}|\\^`\[\]]*)?'  # optional path
-            r')\b'
-        )
 
         def replace_url(match):
             url = match.group(0)
@@ -63,8 +64,8 @@ class ClickableLabel(QLabel):
 
             return f'<a href="{full_url}" style="color: #0066cc; text-decoration: underline;">{url}</a>'
 
-        # Replace URLs with HTML links
-        return url_pattern.sub(replace_url, text)
+        # Replace URLs with HTML links using the class-level compiled pattern
+        return self._URL_PATTERN.sub(replace_url, text)
 
 
 class Toast(QDialog):
@@ -82,6 +83,9 @@ class Toast(QDialog):
 
     __currently_shown = []
     __queue = []
+
+    # CSS cache for better performance
+    __css_cache = None
 
     # Close event
     closed = Signal()
@@ -136,6 +140,14 @@ class Toast(QDialog):
         self.__used = False
         self.__watched_widgets = []
         self.__manual_duration_bar_value = None  # Used to track manually set progress value
+        self.__widget_event_filter_installed = False  # Track event filter state
+        self.__watched_widgets_event_filters_installed = False  # Track watched widgets event filter state
+        self.__cached_stylesheets = {}  # Cache for generated stylesheets
+
+        # Animation and timer references for proper cleanup
+        self.__pos_animation = None
+        self.__fade_in_animation = None
+        self.__fade_out_animation = None
 
         # Window settings
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -215,9 +227,13 @@ class Toast(QDialog):
         self.__duration_bar_timer = QTimer(self)
         self.__duration_bar_timer.timeout.connect(self.__update_duration_bar)
 
-        # Apply stylesheet
-        import os
-        self.setStyleSheet(open(os.path.join(Utils.get_current_directory(), 'css', 'toast.css')).read())
+        # Apply stylesheet (with caching for better performance)
+        if Toast.__css_cache is None:
+            import os
+            css_path = os.path.join(Utils.get_current_directory(), 'css', 'toast.css')
+            with open(css_path, 'r') as css_file:
+                Toast.__css_cache = css_file.read()
+        self.setStyleSheet(Toast.__css_cache)
 
         # Install event filters if position relative to widget and moving with widget
         if Toast.__position_relative_to_widget and Toast.__move_position_with_widget:
@@ -316,6 +332,7 @@ class Toast(QDialog):
                     self.move(x, y + int(self.height() / 1.5) + predecessor_target_difference_y)
 
                 # Start fade down / up animation
+                self.__cleanup_animation('pos')
                 self.__pos_animation = QPropertyAnimation(self, b"pos")
                 self.__pos_animation.setEndValue(QPoint(x, y))
                 self.__pos_animation.setDuration(self.__fade_in_duration)
@@ -325,6 +342,7 @@ class Toast(QDialog):
 
             # Fade in
             super().show()
+            self.__cleanup_animation('fade_in')
             self.__fade_in_animation = QPropertyAnimation(self.__opacity_effect, b"opacity")
             self.__fade_in_animation.setDuration(self.__fade_in_duration)
             self.__fade_in_animation.setStartValue(0)
@@ -349,9 +367,25 @@ class Toast(QDialog):
                 self.__duration_timer.stop()
             self.__fade_out()
 
+    def __cleanup_animation(self, animation_type):
+        """Clean up existing animation to prevent memory leaks"""
+        if animation_type == 'pos' and self.__pos_animation:
+            self.__pos_animation.stop()
+            self.__pos_animation.deleteLater()
+            self.__pos_animation = None
+        elif animation_type == 'fade_in' and self.__fade_in_animation:
+            self.__fade_in_animation.stop()
+            self.__fade_in_animation.deleteLater()
+            self.__fade_in_animation = None
+        elif animation_type == 'fade_out' and self.__fade_out_animation:
+            self.__fade_out_animation.stop()
+            self.__fade_out_animation.deleteLater()
+            self.__fade_out_animation = None
+
     def __fade_out(self):
         """Start the fade out animation"""
 
+        self.__cleanup_animation('fade_out')
         self.__fade_out_animation = QPropertyAnimation(self.__opacity_effect, b"opacity")
         self.__fade_out_animation.setDuration(self.__fade_out_duration)
         self.__fade_out_animation.setStartValue(1)
@@ -359,9 +393,27 @@ class Toast(QDialog):
         self.__fade_out_animation.finished.connect(self.__hide)
         self.__fade_out_animation.start()
 
+    def __cleanup_resources(self):
+        """Clean up all resources to prevent memory leaks"""
+        # Clean up animations
+        self.__cleanup_animation('pos')
+        self.__cleanup_animation('fade_in')
+        self.__cleanup_animation('fade_out')
+
+        # Stop timers
+        if self.__duration_timer.isActive():
+            self.__duration_timer.stop()
+        if self.__duration_bar_timer.isActive():
+            self.__duration_bar_timer.stop()
+
+        # Remove event filters
+        self.__remove_widget_event_filter()
+        self.__remove_watched_widgets_event_filters()
+
     def __hide(self):
         """Hide the toast notification"""
 
+        self.__cleanup_resources()
         self.close()
 
         if self in Toast.__currently_shown:
@@ -422,6 +474,7 @@ class Toast(QDialog):
         position = QPoint(x, y)
 
         # Animate position change
+        self.__cleanup_animation('pos')
         self.__pos_animation = QPropertyAnimation(self, b"pos")
         self.__pos_animation.setEndValue(position)
         self.__pos_animation.setDuration(UPDATE_POSITION_DURATION if animate else 0)
@@ -437,6 +490,7 @@ class Toast(QDialog):
         position = QPoint(x, self.y())
 
         # Animate position change
+        self.__cleanup_animation('pos')
         self.__pos_animation = QPropertyAnimation(self, b"pos")
         self.__pos_animation.setEndValue(position)
         self.__pos_animation.setDuration(UPDATE_POSITION_DURATION if animate else 0)
@@ -452,6 +506,7 @@ class Toast(QDialog):
         position = QPoint(self.x(), y)
 
         # Animate position change
+        self.__cleanup_animation('pos')
         self.__pos_animation = QPropertyAnimation(self, b"pos")
         self.__pos_animation.setEndValue(position)
         self.__pos_animation.setDuration(UPDATE_POSITION_DURATION if animate else 0)
@@ -562,62 +617,71 @@ class Toast(QDialog):
         # Update stylesheet
         self.__update_stylesheet()
 
-        # Calculate title and text width and height
+        # Cache font metrics to avoid repeated creation
         title_font_metrics = QFontMetrics(self.__title_font)
-        title_width = title_font_metrics.width(self.__title_label.text())
-        title_height = title_font_metrics.boundingRect(self.__title_label.text()).height()
         text_font_metrics = QFontMetrics(self.__text_font)
-        text_width = text_font_metrics.width(self.__text_label.text())
-        text_height = text_font_metrics.boundingRect(self.__text_label.text()).height()
-        text_section_spacing = self.__text_section_spacing
-        if self.__title == '' or self.__text == '':
-            text_section_spacing = 0
+
+        # Cache text content to avoid repeated method calls
+        title_text = self.__title_label.text()
+        text_text = self.__text_label.text()
+
+        # Calculate title and text width and height
+        title_width = title_font_metrics.width(title_text) if title_text else 0
+        title_height = title_font_metrics.boundingRect(title_text).height() if title_text else 0
+        text_width = text_font_metrics.width(text_text) if text_text else 0
+        text_height = text_font_metrics.boundingRect(text_text).height() if text_text else 0
+
+        text_section_spacing = self.__text_section_spacing if (self.__title and self.__text) else 0
 
         if self.__multiline:
             self.__title_label.setWordWrap(True)
             self.__text_label.setWordWrap(True)
-            if self.__title != "":
-                title_height = self.__title_label.sizeHint().height()
-                title_width = self.__title_label.sizeHint().width()
-            if self.__text != "":
-                text_height = self.__text_label.sizeHint().height()
-                text_width = self.__text_label.sizeHint().width()
+            if self.__title:
+                title_size_hint = self.__title_label.sizeHint()
+                title_height = title_size_hint.height()
+                title_width = title_size_hint.width()
+            if self.__text:
+                text_size_hint = self.__text_label.sizeHint()
+                text_height = text_size_hint.height()
+                text_width = text_size_hint.width()
         else:
             self.__title_label.setWordWrap(False)
             self.__text_label.setWordWrap(False)
 
-        text_section_height = (
-            self.__text_section_margins.top()
-            + title_height
-            + text_section_spacing
-            + text_height
-            + self.__text_section_margins.bottom()
-        )
+        # Helper function to calculate text section height
+        def calculate_text_section_height():
+            return (self.__text_section_margins.top() + title_height +
+                   text_section_spacing + text_height + self.__text_section_margins.bottom())
+
+        text_section_height = calculate_text_section_height()
 
         # Calculate duration bar height
-        duration_bar_height = 0 if not self.__show_duration_bar else self.__duration_bar_container.height()
+        duration_bar_height = self.__duration_bar_container.height() if self.__show_duration_bar else 0
 
-        # Calculate icon section width and height
-        icon_section_width = 0
-        icon_section_height = 0
-
+        # Calculate icon section dimensions
         if self.__show_icon:
-            icon_section_width = (self.__icon_section_margins.left()
-                                  + self.__icon_margins.left() + self.__icon_widget.width()
-                                  + self.__icon_margins.right() + self.__icon_separator.width()
-                                  + self.__icon_section_margins.right())
-            icon_section_height = (self.__icon_section_margins.top() + self.__icon_margins.top()
-                                   + self.__icon_widget.height() + self.__icon_margins.bottom()
-                                   + self.__icon_section_margins.bottom())
+            icon_section_width = (self.__icon_section_margins.left() + self.__icon_margins.left() +
+                                 self.__icon_widget.width() + self.__icon_margins.right() +
+                                 self.__icon_separator.width() + self.__icon_section_margins.right())
+            icon_section_height = (self.__icon_section_margins.top() + self.__icon_margins.top() +
+                                  self.__icon_widget.height() + self.__icon_margins.bottom() +
+                                  self.__icon_section_margins.bottom())
+        else:
+            icon_section_width = 0
+            icon_section_height = 0
 
-        # Calculate close button section height
-        close_button_width = self.__close_button.width() if self.__show_close_button else 0
-        close_button_height = self.__close_button.height() if self.__show_close_button else 0
-        close_button_margins = self.__close_button_margins if self.__show_close_button else QMargins(0, 0, 0, 0)
-
-        close_button_section_height = (close_button_margins.top()
-                                       + close_button_height
-                                       + close_button_margins.bottom())
+        # Calculate close button section dimensions
+        if self.__show_close_button:
+            close_button_width = self.__close_button.width()
+            close_button_height = self.__close_button.height()
+            close_button_margins = self.__close_button_margins
+            close_button_section_height = (close_button_margins.top() + close_button_height +
+                                         close_button_margins.bottom())
+        else:
+            close_button_width = 0
+            close_button_height = 0
+            close_button_margins = QMargins(0, 0, 0, 0)
+            close_button_section_height = 0
 
         # Calculate needed width and height
         width = (self.__margins.left() + icon_section_width + self.__text_section_margins.left()
@@ -911,33 +975,40 @@ class Toast(QDialog):
     def __install_widget_event_filter(self):
         """Install an event filter on parent"""
 
-        if Toast.__position_relative_to_widget:
+        if Toast.__position_relative_to_widget and not self.__widget_event_filter_installed:
             Toast.__position_relative_to_widget.installEventFilter(self)
+            self.__widget_event_filter_installed = True
 
     def __remove_widget_event_filter(self):
         """Remove an installed event filter on parent"""
 
-        if Toast.__position_relative_to_widget:
+        if Toast.__position_relative_to_widget and self.__widget_event_filter_installed:
             Toast.__position_relative_to_widget.removeEventFilter(self)
+            self.__widget_event_filter_installed = False
 
     def __remove_watched_widgets_event_filters(self):
         """Remove installed event filters on watched widgets"""
 
-        for widget in self.__watched_widgets:
-            widget.removeEventFilter(self)
-        self.__watched_widgets.clear()
+        if self.__watched_widgets_event_filters_installed:
+            for widget in self.__watched_widgets:
+                widget.removeEventFilter(self)
+            self.__watched_widgets.clear()
+            self.__watched_widgets_event_filters_installed = False
 
     def __install_watched_widgets_event_filters(self):
         """Install / reinstall event filters on watched widgets"""
 
-        self.__remove_watched_widgets_event_filters()
+        # Only remove if already installed
+        if self.__watched_widgets_event_filters_installed:
+            self.__remove_watched_widgets_event_filters()
 
         if Toast.__position_relative_to_widget is None:
             return
 
-        self.__watched_widgets += Utils.get_parents(Toast.__position_relative_to_widget)
+        self.__watched_widgets = Utils.get_parents(Toast.__position_relative_to_widget)
         for widget in self.__watched_widgets:
             widget.installEventFilter(self)
+        self.__watched_widgets_event_filters_installed = True
 
     def setFixedSize(self, size: QSize):
         """Set a fixed toast size
@@ -982,6 +1053,8 @@ class Toast(QDialog):
 
         if self.__used:
             return
+        if duration < 0:
+            raise ValueError("Duration must be non-negative")
         self.__duration = duration
 
     def isShowDurationBar(self) -> bool:
@@ -2181,32 +2254,44 @@ class Toast(QDialog):
     def __update_stylesheet(self):
         """Update the stylesheet of the toast"""
 
-        self.__toast_widget.setStyleSheet('background: {};'
-                                          'border-radius: {}px;'
-                                          .format(self.__background_color.name(),
-                                                  self.__border_radius))
+        # Generate cache keys for each stylesheet
+        toast_key = f"toast_{self.__background_color.name()}_{self.__border_radius}"
+        duration_bar_key = f"duration_bar_{self.__duration_bar_color.red()}_{self.__duration_bar_color.green()}_{self.__duration_bar_color.blue()}_{self.__border_radius}"
+        duration_bar_chunk_key = f"duration_bar_chunk_{self.__duration_bar_color.red()}_{self.__duration_bar_color.green()}_{self.__duration_bar_color.blue()}_{self.__border_radius}_{self.__duration == 0}"
+        icon_separator_key = f"icon_separator_{self.__icon_separator_color.name()}"
+        title_key = f"title_{self.__title_color.name()}"
+        text_key = f"text_{self.__text_color.name()}"
 
-        self.__duration_bar.setStyleSheet('background: rgba({}, {}, {}, 100);'
-                                          'border-radius: {}px;'
-                                          .format(self.__duration_bar_color.red(),
-                                                  self.__duration_bar_color.green(),
-                                                  self.__duration_bar_color.blue(),
-                                                  self.__border_radius))
+        # Toast widget stylesheet
+        if toast_key not in self.__cached_stylesheets:
+            self.__cached_stylesheets[toast_key] = f'background: {self.__background_color.name()};border-radius: {self.__border_radius}px;'
+        self.__toast_widget.setStyleSheet(self.__cached_stylesheets[toast_key])
 
-        self.__duration_bar_chunk.setStyleSheet('background: rgba({}, {}, {}, 255);'
-                                                'border-bottom-left-radius: {}px;'
-                                                'border-bottom-right-radius: {}px;'
-                                                .format(self.__duration_bar_color.red(),
-                                                        self.__duration_bar_color.green(),
-                                                        self.__duration_bar_color.blue(),
-                                                        self.__border_radius,
-                                                        self.__border_radius if self.__duration == 0 else 0))
+        # Duration bar stylesheet
+        if duration_bar_key not in self.__cached_stylesheets:
+            self.__cached_stylesheets[duration_bar_key] = f'background: rgba({self.__duration_bar_color.red()}, {self.__duration_bar_color.green()}, {self.__duration_bar_color.blue()}, 100);border-radius: {self.__border_radius}px;'
+        self.__duration_bar.setStyleSheet(self.__cached_stylesheets[duration_bar_key])
 
-        self.__icon_separator.setStyleSheet('background: {};'
-                                            .format(self.__icon_separator_color.name()))
+        # Duration bar chunk stylesheet
+        if duration_bar_chunk_key not in self.__cached_stylesheets:
+            right_radius = self.__border_radius if self.__duration == 0 else 0
+            self.__cached_stylesheets[duration_bar_chunk_key] = f'background: rgba({self.__duration_bar_color.red()}, {self.__duration_bar_color.green()}, {self.__duration_bar_color.blue()}, 255);border-bottom-left-radius: {self.__border_radius}px;border-bottom-right-radius: {right_radius}px;'
+        self.__duration_bar_chunk.setStyleSheet(self.__cached_stylesheets[duration_bar_chunk_key])
 
-        self.__title_label.setStyleSheet('color: {};'.format(self.__title_color.name()))
-        self.__text_label.setStyleSheet('color: {};'.format(self.__text_color.name()))
+        # Icon separator stylesheet
+        if icon_separator_key not in self.__cached_stylesheets:
+            self.__cached_stylesheets[icon_separator_key] = f'background: {self.__icon_separator_color.name()};'
+        self.__icon_separator.setStyleSheet(self.__cached_stylesheets[icon_separator_key])
+
+        # Title label stylesheet
+        if title_key not in self.__cached_stylesheets:
+            self.__cached_stylesheets[title_key] = f'color: {self.__title_color.name()};'
+        self.__title_label.setStyleSheet(self.__cached_stylesheets[title_key])
+
+        # Text label stylesheet
+        if text_key not in self.__cached_stylesheets:
+            self.__cached_stylesheets[text_key] = f'color: {self.__text_color.name()};'
+        self.__text_label.setStyleSheet(self.__cached_stylesheets[text_key])
 
     @staticmethod
     def __update_currently_showing_position_xy(animate: bool = True):
