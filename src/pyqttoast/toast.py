@@ -1358,12 +1358,12 @@ class Toast(QDialog):
         self.__stay_on_top = on
 
         if on:
-            self.setWindowFlags(Qt.WindowType.Tool |
+            self.setWindowFlags(Qt.WindowType.ToolTip |
                                 Qt.WindowType.CustomizeWindowHint |
                                 Qt.WindowType.FramelessWindowHint |
                                 Qt.WindowType.WindowStaysOnTopHint)
         else:
-            self.setWindowFlags(Qt.WindowType.Tool |
+            self.setWindowFlags(Qt.WindowType.ToolTip |
                                 Qt.WindowType.CustomizeWindowHint |
                                 Qt.WindowType.FramelessWindowHint)
 
