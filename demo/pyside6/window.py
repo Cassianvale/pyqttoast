@@ -1150,14 +1150,19 @@ class Window(QMainWindow):
         toast.show()
 
     def test_callbacks(self):
-        """Test toast with callback events."""
+        """Test toast with callback events and print callback records to console."""
+        print("=== Toast Callbacks Test Started ===")
+
         toast = Toast(self)
         toast.setDuration(3000)
         toast.setTitle(self.language_manager.get_text("test_callbacks"))
         toast.setText("This toast will show a message when it closes.")
 
-        # Connect to closed signal
+        # Connect to closed signal with console logging
         toast.closed.connect(lambda: self.show_callback_message())
+
+        # Print callback registration
+        print(f"[CALLBACK] Registered 'closed' callback for toast: '{toast.getTitle()}'")
 
         # Apply advanced settings
         toast.setStayOnTop(self.stay_on_top_checkbox.isChecked())
@@ -1169,16 +1174,25 @@ class Window(QMainWindow):
         # Apply other custom settings
         self._apply_custom_toast_settings(toast)
         toast.applyPreset(ToastPreset.WARNING)
+
+        print(f"[TOAST] Showing toast with title: '{toast.getTitle()}'")
+        print(f"[TOAST] Duration: {toast.getDuration()}ms")
         toast.show()
 
     def show_callback_message(self):
-        """Show a simple message when callback is triggered."""
+        """Show a simple message when callback is triggered and log to console."""
+        print("[CALLBACK] Toast 'closed' callback triggered!")
+        print("[CALLBACK] Previous toast was closed by user or timeout")
+
         callback_toast = Toast(self)
         callback_toast.setDuration(2000)
         callback_toast.setTitle("Callback Event")
         callback_toast.setText("Previous toast was closed!")
         callback_toast.applyPreset(ToastPreset.SUCCESS)
+
+        print(f"[CALLBACK] Showing callback toast: '{callback_toast.getTitle()}'")
         callback_toast.show()
+        print("=== Toast Callbacks Test Completed ===")
 
     def show_multiple_toasts(self):
         """Show multiple toasts to demonstrate stacking."""
