@@ -30,9 +30,41 @@ A fully customizable and modern toast notification library for PyQt and PySide
 * **Cross-platform** - Works with `PyQt5`, `PyQt6`, `PySide2`, and `PySide6`
 
 ## Installation
-```
+
+### Original Version (Stable)
+If you want to use the original author's stable version:
+```bash
 pip install pyqt-toast-notification
 ```
+
+### This Project Version (Enhanced)
+This project is a fork of the original with additional features and improvements. To use this version:
+
+1. **Clone this repository:**
+```bash
+git clone https://github.com/Cassianvale/pyqttoast.git
+cd pyqttoast
+```
+
+2. **Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
+
+3. **Install in development mode:**
+```bash
+pip install -e .
+```
+
+4. **Or run directly without installation:**
+```python
+# Add project root directory to Python path
+import sys
+sys.path.insert(0, '/path/to/pyqttoast')
+from src.pyqttoast import Toast, ToastPreset
+```
+
+> **Note:** This project includes modern margin API, performance optimizations, and other enhancements not available in the original version.
 
 ## Usage
 Import the `Toast` class, instantiate it, and show the toast notification with the `show()` method:
