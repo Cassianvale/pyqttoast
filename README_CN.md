@@ -1,3 +1,5 @@
+<div align="center">
+
 # PyQt Toast
 
 <img src="https://socialify.git.ci/Cassianvale/pyqttoast/image?font=Source+Code+Pro&language=1&name=1&pattern=Diagonal+Stripes&theme=Auto" alt="pyqttoast" width="640" height="320" />
@@ -11,6 +13,8 @@
 **语言:** [English](README.md) | ➡️*中文*
 
 一个完全可定制的现代化 PyQt 和 PySide 通知库
+
+</div>
 
 ![pyqttoast](https://github.com/niklashenning/pyqt-toast/assets/58544929/c104f10e-08df-4665-98d8-3785822a20dc)
 
