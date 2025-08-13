@@ -109,6 +109,55 @@ class LanguageManager:
             "bottom": {Language.CHINESE: "底部", Language.ENGLISH: "Bottom"},
             "disabled": {Language.CHINESE: "禁用", Language.ENGLISH: "Disabled"},
             
+            # Tab titles
+            "basic_features": {Language.CHINESE: "基础功能", Language.ENGLISH: "Basic Features"},
+            "advanced_features": {Language.CHINESE: "高级功能", Language.ENGLISH: "Advanced Features"},
+
+            # Animation group
+            "animation_settings": {Language.CHINESE: "动画设置", Language.ENGLISH: "Animation Settings"},
+            "animation_direction": {Language.CHINESE: "动画方向:", Language.ENGLISH: "Animation Direction:"},
+            "auto": {Language.CHINESE: "自动", Language.ENGLISH: "Auto"},
+            "from_top": {Language.CHINESE: "从顶部", Language.ENGLISH: "From Top"},
+            "from_bottom": {Language.CHINESE: "从底部", Language.ENGLISH: "From Bottom"},
+            "from_left": {Language.CHINESE: "从左侧", Language.ENGLISH: "From Left"},
+            "from_right": {Language.CHINESE: "从右侧", Language.ENGLISH: "From Right"},
+            "fade_only": {Language.CHINESE: "仅淡化", Language.ENGLISH: "Fade Only"},
+            "test_animation": {Language.CHINESE: "测试动画", Language.ENGLISH: "Test Animation"},
+
+            # Margins group
+            "margins_settings": {Language.CHINESE: "边距设置", Language.ENGLISH: "Margins Settings"},
+            "content_margins": {Language.CHINESE: "内容边距:", Language.ENGLISH: "Content Margins:"},
+            "icon_margins": {Language.CHINESE: "图标边距:", Language.ENGLISH: "Icon Margins:"},
+            "text_section_margins": {Language.CHINESE: "文本区域边距:", Language.ENGLISH: "Text Section Margins:"},
+            "left": {Language.CHINESE: "左:", Language.ENGLISH: "Left:"},
+            "right": {Language.CHINESE: "右:", Language.ENGLISH: "Right:"},
+            "apply_margins": {Language.CHINESE: "应用边距", Language.ENGLISH: "Apply Margins"},
+
+            # Colors group
+            "color_settings": {Language.CHINESE: "颜色设置", Language.ENGLISH: "Color Settings"},
+            "background_color": {Language.CHINESE: "背景颜色:", Language.ENGLISH: "Background Color:"},
+            "title_color": {Language.CHINESE: "标题颜色:", Language.ENGLISH: "Title Color:"},
+            "text_color": {Language.CHINESE: "文本颜色:", Language.ENGLISH: "Text Color:"},
+            "icon_color": {Language.CHINESE: "图标颜色:", Language.ENGLISH: "Icon Color:"},
+            "duration_bar_color": {Language.CHINESE: "持续时间条颜色:", Language.ENGLISH: "Duration Bar Color:"},
+            "choose_color": {Language.CHINESE: "选择颜色", Language.ENGLISH: "Choose Color"},
+            "reset_colors": {Language.CHINESE: "重置颜色", Language.ENGLISH: "Reset Colors"},
+
+            # Advanced features group
+            "advanced_settings": {Language.CHINESE: "高级设置", Language.ENGLISH: "Advanced Settings"},
+            "stay_on_top": {Language.CHINESE: "保持在顶层", Language.ENGLISH: "Stay on Top"},
+            "icon_separator": {Language.CHINESE: "显示图标分隔符", Language.ENGLISH: "Show Icon Separator"},
+            "separator_width": {Language.CHINESE: "分隔符宽度:", Language.ENGLISH: "Separator Width:"},
+            "separator_color": {Language.CHINESE: "分隔符颜色:", Language.ENGLISH: "Separator Color:"},
+            "close_button_color": {Language.CHINESE: "关闭按钮颜色:", Language.ENGLISH: "Close Button Color:"},
+            "test_callbacks": {Language.CHINESE: "测试回调事件", Language.ENGLISH: "Test Callbacks"},
+            "show_multiple": {Language.CHINESE: "显示多个通知", Language.ENGLISH: "Show Multiple Toasts"},
+            "queue_demo": {Language.CHINESE: "队列演示", Language.ENGLISH: "Queue Demo"},
+
+            # Additional labels for margins
+            "top": {Language.CHINESE: "上:", Language.ENGLISH: "Top:"},
+            "bottom": {Language.CHINESE: "下:", Language.ENGLISH: "Bottom:"},
+
             # Default values
             "default_title": {Language.CHINESE: "这是一个标题", Language.ENGLISH: "This is a title"},
             
