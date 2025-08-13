@@ -1,23 +1,29 @@
 # PyQt Toast
 
+<img src="https://socialify.git.ci/Cassianvale/pyqttoast/image?font=Source+Code+Pro&language=1&name=1&pattern=Diagonal+Stripes&theme=Auto" alt="pyqttoast" width="640" height="320" />
+
 [![PyPI](https://img.shields.io/badge/pypi-v1.3.3-blue)](https://pypi.org/project/pyqt-toast-notification/)
 [![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/niklashenning/pyqttoast)
 [![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/niklashenning/pyqttoast)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-green)](https://github.com/niklashenning/pyqttoast)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/niklashenning/pyqttoast/blob/master/LICENSE)
 
+**Language:** ➡️*English* | [中文](README_CN.md)
+
 A fully customizable and modern toast notification library for PyQt and PySide
 
 ![pyqttoast](https://github.com/niklashenning/pyqt-toast/assets/58544929/c104f10e-08df-4665-98d8-3785822a20dc)
 
-## Features
-* Supports showing multiple toasts at the same time
-* Supports queueing of toasts
-* Supports 7 different positions
-* Supports multiple screens
-* Supports positioning relative to widgets
-* Modern and fully customizable UI
-* Works with `PyQt5`, `PyQt6`, `PySide2`, and `PySide6`
+## ✨ Key Features
+* **Modern Margin API** - Flexible and efficient margin management with multiple input formats
+* **Advanced Animation Control** - Independent position and animation direction control
+* **Performance Optimized** - Cached stylesheets, regex patterns, and optimized rendering
+* **Multi-toast Support** - Show multiple toasts simultaneously with intelligent queueing
+* **7 Position Options** - Flexible positioning including screen center
+* **Multi-screen Support** - Works seamlessly across multiple monitors
+* **Widget-relative Positioning** - Position toasts relative to specific widgets
+* **Modern UI** - Fully customizable appearance with preset styles
+* **Cross-platform** - Works with `PyQt5`, `PyQt6`, `PySide2`, and `PySide6`
 
 ## Installation
 ```
@@ -185,6 +191,31 @@ toast.setTitleFont(font)  # Default: QFont('Arial', 9, QFont.Weight.Bold)
 toast.setTextFont(font)   # Default: QFont('Arial', 9)
 ```
 
+* **Modern margin management (NEW):**
+```python
+# Simple - all margins the same
+toast.setMargins(20)
+
+# Precise - left, top, right, bottom
+toast.setMargins((15, 10, 15, 20))
+
+# Symmetric - horizontal, vertical
+toast.setMargins((25, 15))
+
+# Partial update - only specific margins
+toast.setMargins({'left': 30, 'right': 35})
+
+# Different component margins
+toast.setMargins(10, 'icon')           # Icon margins
+toast.setMargins(5, 'text_section')   # Text section margins
+toast.setMargins(8, 'close_button')   # Close button margins
+
+# Fine-tune existing margins
+toast.adjustMargins(top=8, bottom=12)
+toast.adjustMargins('icon', left=5, right=10)
+```
+> **MARGIN TYPES:** <br> `content` (default), `icon`, `icon_section`, `text_section`, `close_button`
+
 * **Applying a style preset:**
 ```python
 toast.applyPreset(ToastPreset.ERROR)
@@ -216,11 +247,11 @@ toast.setFixedSize(QSize(350, 80))
 | `setCloseButtonSize()`        | Size of the close button                                                        | `QSize(24, 24)`            |
 | `setStayOnTop()`              | Whether the toast stays on top of other windows even when they are focused      | `True`                     |
 | `setTextSectionSpacing()`     | Vertical spacing between the title and the text                                 | `8`                        |
-| `setMargins()`                | Margins around the whole toast content                                          | `QMargins(20, 18, 10, 18)` |
-| `setIconMargins()`            | Margins around the icon                                                         | `QMargins(0, 0, 15, 0)`    |
-| `setIconSectionMargins()`     | Margins around the icon section (the area with the icon and the icon separator) | `QMargins(0, 0, 15, 0)`    |
-| `setTextSectionMargins()`     | Margins around the text section (the area with the title and the text)          | `QMargins(0, 0, 15, 0)`    |
-| `setCloseButtonMargins()`     | Margins around the close button                                                 | `QMargins(0, -8, 0, -8)`   |
+
+## API Documentation
+
+For complete API reference and advanced usage examples, see:
+- [Toast API Reference Table (English)](docs/Toast_API_Reference_Table.md) - Detailed documentation with examples
 
 ## Demo
 https://github.com/niklashenning/pyqt-toast/assets/58544929/f4d7f4a4-6d69-4087-ae19-da54b6da499d
