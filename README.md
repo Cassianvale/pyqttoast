@@ -1,3 +1,5 @@
+<div align="center">
+
 # PyQt Toast
 
 <img src="https://socialify.git.ci/Cassianvale/pyqttoast/image?font=Source+Code+Pro&language=1&name=1&pattern=Diagonal+Stripes&theme=Auto" alt="pyqttoast" width="640" height="320" />
@@ -11,6 +13,8 @@
 **Language:** ➡️*English* | [中文](README_CN.md)
 
 A fully customizable and modern toast notification library for PyQt and PySide
+
+</div>
 
 ![pyqttoast](https://github.com/niklashenning/pyqt-toast/assets/58544929/c104f10e-08df-4665-98d8-3785822a20dc)
 
