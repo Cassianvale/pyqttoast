@@ -30,9 +30,41 @@
 * **跨平台** - 支持 `PyQt5`、`PyQt6`、`PySide2` 和 `PySide6`
 
 ## 安装
-```
+
+### 原作者版本（稳定版）
+如果您想使用原作者的稳定版本：
+```bash
 pip install pyqt-toast-notification
 ```
+
+### 本项目版本（增强版）
+本项目是原作者项目的fork版本，包含了额外的功能和改进。要使用本版本：
+
+1. **克隆本仓库：**
+```bash
+git clone https://github.com/Cassianvale/pyqttoast.git
+cd pyqttoast
+```
+
+2. **安装依赖：**
+```bash
+pip install -r requirements.txt
+```
+
+3. **以开发模式安装：**
+```bash
+pip install -e .
+```
+
+4. **或者直接运行而不安装：**
+```python
+# 将项目根目录添加到 Python 路径
+import sys
+sys.path.insert(0, '/path/to/pyqttoast')
+from src.pyqttoast import Toast, ToastPreset
+```
+
+> **注意：** 本项目包含现代边距API、性能优化和其他增强功能，这些在原版本中不可用。
 
 ## 使用方法
 导入 `Toast` 类，实例化它，然后使用 `show()` 方法显示通知：
