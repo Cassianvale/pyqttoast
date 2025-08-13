@@ -14,6 +14,91 @@ from .drop_shadow import DropShadow
 from .constants import *
 
 
+class MarginManager:
+    """Modern margin manager with flexible API for Toast margin settings"""
+
+    def __init__(self, toast_instance):
+        """Initialize the margin manager
+
+        :param toast_instance: Toast instance
+        """
+        self.toast = toast_instance
+        self._margin_attrs = {
+            'content': '_Toast__margins',
+            'icon': '_Toast__icon_margins',
+            'icon_section': '_Toast__icon_section_margins',
+            'text_section': '_Toast__text_section_margins',
+            'close_button': '_Toast__close_button_margins'
+        }
+
+    def get(self, margin_type: str = 'content') -> QMargins:
+        """Get margin object for specified type
+
+        :param margin_type: Type of margin ('content', 'icon', 'icon_section', 'text_section', 'close_button')
+        :return: QMargins object
+        """
+        attr_name = self._margin_attrs.get(margin_type, self._margin_attrs['content'])
+        return getattr(self.toast, attr_name)
+
+    def set(self, margins, margin_type: str = 'content'):
+        """Set margins with flexible input types
+
+        :param margins: Can be QMargins, int (all sides), tuple (left,top,right,bottom), or dict
+        :param margin_type: Type of margin to set
+        """
+        if self.toast._Toast__used:
+            return
+
+        attr_name = self._margin_attrs.get(margin_type, self._margin_attrs['content'])
+
+        # Convert various input types to QMargins
+        if isinstance(margins, QMargins):
+            new_margins = margins
+        elif isinstance(margins, int):
+            # Single value for all sides
+            new_margins = QMargins(margins, margins, margins, margins)
+        elif isinstance(margins, (tuple, list)) and len(margins) == 4:
+            # (left, top, right, bottom)
+            new_margins = QMargins(*margins)
+        elif isinstance(margins, (tuple, list)) and len(margins) == 2:
+            # (horizontal, vertical)
+            h, v = margins
+            new_margins = QMargins(h, v, h, v)
+        elif isinstance(margins, dict):
+            # {'left': 10, 'top': 5, 'right': 10, 'bottom': 5}
+            current = getattr(self.toast, attr_name)
+            new_margins = QMargins(
+                margins.get('left', current.left()),
+                margins.get('top', current.top()),
+                margins.get('right', current.right()),
+                margins.get('bottom', current.bottom())
+            )
+        else:
+            raise ValueError(f"Invalid margins type: {type(margins)}")
+
+        setattr(self.toast, attr_name, new_margins)
+
+    def adjust(self, margin_type: str = 'content', **kwargs):
+        """Adjust specific sides of margins
+
+        :param margin_type: Type of margin to adjust
+        :param kwargs: left, top, right, bottom values to adjust
+        """
+        if self.toast._Toast__used:
+            return
+
+        current = self.get(margin_type)
+        new_margins = QMargins(
+            kwargs.get('left', current.left()),
+            kwargs.get('top', current.top()),
+            kwargs.get('right', current.right()),
+            kwargs.get('bottom', current.bottom())
+        )
+
+        attr_name = self._margin_attrs[margin_type]
+        setattr(self.toast, attr_name, new_margins)
+
+
 class ClickableLabel(QLabel):
     """A QLabel that supports clickable links"""
 
@@ -134,6 +219,9 @@ class Toast(QDialog):
         self.__close_button_margins = QMargins(0, -8, 0, -8)
         self.__text_section_spacing = 8
         self.__multiline = False
+
+        # Create modern margin manager
+        self.margins = MarginManager(self)
 
         self.__elapsed_time = 0
         self.__fading_out = False
@@ -1713,455 +1801,76 @@ class Toast(QDialog):
         """
         return self.__text_font.family()
 
-    def getMargins(self) -> QMargins:
-        """Get the margins of the toast content
+    # ========== Modern Margin API (Replaces 50 individual methods) ==========
 
-        :return: margins
+    def setMargins(self, margins, margin_type: str = 'content'):
+        """Set margins with flexible input types
+
+        :param margins: Can be QMargins, int (all sides), tuple (left,top,right,bottom), or dict
+        :param margin_type: 'content', 'icon', 'icon_section', 'text_section', 'close_button'
+
+        Examples:
+            toast.setMargins(20)  # All sides 20px
+            toast.setMargins((10, 5, 10, 5))  # left, top, right, bottom
+            toast.setMargins((15, 10))  # horizontal, vertical
+            toast.setMargins({'left': 20, 'right': 10})  # Partial update
+            toast.setMargins(QMargins(10, 5, 10, 5))  # QMargins object
+            toast.setMargins(15, 'icon')  # Icon margins
         """
+        self.margins.set(margins, margin_type)
 
-        return self.__margins
+    def getMargins(self, margin_type: str = 'content') -> QMargins:
+        """Get margins for specified type
 
-    def setMargins(self, margins: QMargins):
-        """Set the margins of the toast content
-
-        :param margins: new margins
+        :param margin_type: 'content', 'icon', 'icon_section', 'text_section', 'close_button'
+        :return: QMargins object
         """
+        return self.margins.get(margin_type)
 
-        if self.__used:
-            return
-        self.__margins = margins
+    def adjustMargins(self, margin_type: str = 'content', **kwargs):
+        """Adjust specific sides of margins
 
-    def getMarginLeft(self) -> int:
-        """Get the left margin of the toast content
+        :param margin_type: Type of margin to adjust
+        :param kwargs: left, top, right, bottom values
 
-        :return: left margin
+        Examples:
+            toast.adjustMargins(left=20, right=10)  # Adjust content margins
+            toast.adjustMargins('icon', top=5, bottom=5)  # Adjust icon margins
         """
+        self.margins.adjust(margin_type, **kwargs)
 
-        return self.__margins.left()
-
+    # Legacy compatibility methods (simplified)
     def setMarginLeft(self, margin: int):
-        """Set the left margin of the toast content
-
-        :param margin: new left margin
-        """
-
-        if self.__used:
-            return
-        self.__margins.setLeft(margin)
-
-    def getMarginTop(self) -> int:
-        """Get the top margin of the toast content
-
-        :return: top margin
-        """
-
-        return self.__margins.top()
+        """Set left margin of content (legacy compatibility)"""
+        self.adjustMargins(left=margin)
 
     def setMarginTop(self, margin: int):
-        """Set the top margin of the toast content
-
-        :param margin: new top margin
-        """
-
-        if self.__used:
-            return
-        self.__margins.setTop(margin)
-
-    def getMarginRight(self) -> int:
-        """Get the right margin of the toast content
-
-        :return: right margin
-        """
-
-        return self.__margins.right()
+        """Set top margin of content (legacy compatibility)"""
+        self.adjustMargins(top=margin)
 
     def setMarginRight(self, margin: int):
-        """Set the right margin of the toast content
-
-        :param margin: new right margin
-        """
-
-        if self.__used:
-            return
-        self.__margins.setRight(margin)
-
-    def getMarginBottom(self) -> int:
-        """Get the bottom margin of the toast content
-
-        :return: bottom margin
-        """
-
-        return self.__margins.bottom()
+        """Set right margin of content (legacy compatibility)"""
+        self.adjustMargins(right=margin)
 
     def setMarginBottom(self, margin: int):
-        """Set the bottom margin of the toast content
-
-        :param margin: new bottom margin
-        """
-
-        if self.__used:
-            return
-        self.__margins.setBottom(margin)
-
-    def getIconMargins(self) -> QMargins:
-        """Get the margins of the icon
-
-        :return: margins
-        """
-
-        return self.__icon_margins
-
-    def setIconMargins(self, margins: QMargins):
-        """Set the margins of the icon
-
-        :param margins: new margins
-        """
-
-        if self.__used:
-            return
-        self.__icon_margins = margins
-
-    def getIconMarginLeft(self) -> int:
-        """Get the left margin of the icon
-
-        :return: left margin
-        """
-
-        return self.__icon_margins.left()
-
-    def setIconMarginLeft(self, margin: int):
-        """Set the left margin of the icon
-
-        :param margin: new left margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_margins.setLeft(margin)
-
-    def getIconMarginTop(self) -> int:
-        """Get the top margin of the icon
-
-        :return: top margin
-        """
-
-        return self.__icon_margins.top()
-
-    def setIconMarginTop(self, margin: int):
-        """Set the top margin of the icon
-
-        :param margin: new top margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_margins.setTop(margin)
-
-    def getIconMarginRight(self) -> int:
-        """Get the right margin of the icon
-
-        :return: right margin
-        """
-
-        return self.__icon_margins.right()
-
-    def setIconMarginRight(self, margin: int):
-        """Set the right margin of the icon
-
-        :param margin: new right margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_margins.setRight(margin)
-
-    def getIconMarginBottom(self) -> int:
-        """Get the bottom margin of the icon
-
-        :return: bottom margin
-        """
-
-        return self.__icon_margins.bottom()
-
-    def setIconMarginBottom(self, margin: int):
-        """Set the bottom margin of the icon
-
-        :param margin: new bottom margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_margins.setBottom(margin)
-
-    def getIconSectionMargins(self) -> QMargins:
-        """Get the margins of the icon section
-
-        :return: margins
-        """
-
-        return self.__icon_section_margins
-
-    def setIconSectionMargins(self, margins: QMargins):
-        """Set the margins of the icon section
-
-        :param margins: new margins
-        """
-
-        if self.__used:
-            return
-        self.__icon_section_margins = margins
-
-    def getIconSectionMarginLeft(self) -> int:
-        """Get the left margin of the icon section
-
-        :return: left margin
-        """
-
-        return self.__icon_section_margins.left()
-
-    def setIconSectionMarginLeft(self, margin: int):
-        """Set the left margin of the icon section
-
-        :param margin: new left margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_section_margins.setLeft(margin)
-
-    def getIconSectionMarginTop(self) -> int:
-        """Get the top margin of the icon section
-
-        :return: top margin
-        """
-
-        return self.__icon_section_margins.top()
-
-    def setIconSectionMarginTop(self, margin: int):
-        """Set the top margin of the icon section
-
-        :param margin: new top margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_section_margins.setTop(margin)
-
-    def getIconSectionMarginRight(self) -> int:
-        """Get the right margin of the icon section
-
-        :return: right margin
-        """
-
-        return self.__icon_section_margins.right()
-
-    def setIconSectionMarginRight(self, margin: int):
-        """Set the right margin of the icon section
-
-        :param margin: new right margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_section_margins.setRight(margin)
-
-    def getIconSectionMarginBottom(self) -> int:
-        """Get the bottom margin of the icon section
-
-        :return: bottom margin
-        """
-
-        return self.__icon_section_margins.bottom()
-
-    def setIconSectionMarginBottom(self, margin: int):
-        """Set the bottom margin of the icon section
-
-        :param margin: new bottom margin
-        """
-
-        if self.__used:
-            return
-        self.__icon_section_margins.setBottom(margin)
-
-    def getTextSectionMargins(self) -> QMargins:
-        """Get the margins of the text section
-
-        :return: margins
-        """
-
-        return self.__text_section_margins
-
-    def setTextSectionMargins(self, margins: QMargins):
-        """Set the margins of the text section
-
-        :param margins: new margins
-        """
-
-        if self.__used:
-            return
-        self.__text_section_margins = margins
-
-    def getTextSectionMarginLeft(self) -> int:
-        """Get the left margin of the text section
-
-        :return: left margin
-        """
-
-        return self.__text_section_margins.left()
-
-    def setTextSectionMarginLeft(self, margin: int):
-        """Set the left margin of the text section
-
-        :param margin: new left margin
-        """
-
-        if self.__used:
-            return
-        self.__text_section_margins.setLeft(margin)
-
-    def getTextSectionMarginTop(self) -> int:
-        """Get the top margin of the text section
-
-        :return: top margin
-        """
-
-        return self.__text_section_margins.top()
-
-    def setTextSectionMarginTop(self, margin: int):
-        """Set the top margin of the text section
-
-        :param margin: new top margin
-        """
-
-        if self.__used:
-            return
-        self.__text_section_margins.setTop(margin)
-
-    def getTextSectionMarginRight(self) -> int:
-        """Get the right margin of the text section
-
-        :return: right margin
-        """
-
-        return self.__text_section_margins.right()
-
-    def setTextSectionMarginRight(self, margin: int):
-        """Set the right margin of the text section
-
-        :param margin: new right margin
-        """
-
-        if self.__used:
-            return
-        self.__text_section_margins.setRight(margin)
-
-    def getTextSectionMarginBottom(self) -> int:
-        """Get the bottom margin of the text section
-
-        :return: bottom margin
-        """
-
-        return self.__text_section_margins.bottom()
-
-    def setTextSectionMarginBottom(self, margin: int):
-        """Set the bottom margin of the text section
-
-        :param margin: new bottom margin
-        """
-
-        if self.__used:
-            return
-        self.__text_section_margins.setBottom(margin)
-
-    def getCloseButtonMargins(self) -> QMargins:
-        """Get the margins of the close button
-
-        :return: margins
-        """
-
-        return self.__close_button_margins
-
-    def setCloseButtonMargins(self, margins: QMargins):
-        """Set the margins of the close button
-
-        :param margins: new margins
-        """
-
-        if self.__used:
-            return
-        self.__close_button_margins = margins
-
-    def getCloseButtonMarginLeft(self) -> int:
-        """Get the left margin of the close button
-
-        :return: left margin
-        """
-
-        return self.__close_button_margins.left()
-
-    def setCloseButtonMarginLeft(self, margin: int):
-        """Set the left margin of the close button
-
-        :param margin: new left margin
-        """
-
-        if self.__used:
-            return
-        self.__close_button_margins.setLeft(margin)
-
-    def getCloseButtonMarginTop(self) -> int:
-        """Get the top margin of the close button
-
-        :return: top margin
-        """
-
-        return self.__close_button_margins.top()
-
-    def setCloseButtonMarginTop(self, margin: int):
-        """Set the top margin of the close button
-
-        :param margin: new top margin
-        """
-
-        if self.__used:
-            return
-        self.__close_button_margins.setTop(margin)
-
-    def getCloseButtonMarginRight(self) -> int:
-        """Get the right margin of the close button
-
-        :return: right margin
-        """
-
-        return self.__close_button_margins.right()
-
-    def setCloseButtonMarginRight(self, margin: int):
-        """Set the right margin of the close button
-
-        :param margin: new right margin
-        """
-
-        if self.__used:
-            return
-        self.__close_button_margins.setRight(margin)
-
-    def getCloseButtonMarginBottom(self) -> int:
-        """Get the bottom margin of the close button
-
-        :return: bottom margin
-        """
-
-        return self.__close_button_margins.bottom()
-
-    def setCloseButtonMarginBottom(self, margin: int):
-        """Set the bottom margin of the close button
-
-        :param margin: new bottom margin
-        """
-
-        if self.__used:
-            return
-        self.__close_button_margins.setBottom(margin)
+        """Set bottom margin of content (legacy compatibility)"""
+        self.adjustMargins(bottom=margin)
+
+    def getMarginLeft(self) -> int:
+        """Get left margin of content (legacy compatibility)"""
+        return self.getMargins().left()
+
+    def getMarginTop(self) -> int:
+        """Get top margin of content (legacy compatibility)"""
+        return self.getMargins().top()
+
+    def getMarginRight(self) -> int:
+        """Get right margin of content (legacy compatibility)"""
+        return self.getMargins().right()
+
+    def getMarginBottom(self) -> int:
+        """Get bottom margin of content (legacy compatibility)"""
+        return self.getMargins().bottom()
 
     def getTextSectionSpacing(self) -> int:
         """Get the spacing between the title and the text
