@@ -141,6 +141,18 @@ toast.setFadeInDuration(100)   # Default: 250
 toast.setFadeOutDuration(150)  # Default: 250
 ```
 
+* **Controlling animation direction:**
+```python
+toast.setAnimationDirection(ToastAnimationDirection.FROM_LEFT)  # Default: ToastAnimationDirection.AUTO
+```
+> **AVAILABLE DIRECTIONS:** <br>
+> `AUTO` - Direction based on toast position (backward compatible) <br>
+> `FROM_TOP` - Slide in/out from top <br>
+> `FROM_BOTTOM` - Slide in/out from bottom <br>
+> `FROM_LEFT` - Slide in/out from left <br>
+> `FROM_RIGHT` - Slide in/out from right <br>
+> `FADE_ONLY` - Pure opacity animation, no position movement
+
 * **Enabling or disabling duration reset on hover:**
 
 ```python
