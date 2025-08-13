@@ -1056,7 +1056,7 @@ class Toast(QDialog):
         if self.__used:
             return
 
-        if type(icon) == ToastIcon:
+        if isinstance(icon, ToastIcon):
             self.__icon = IconUtils.get_icon_from_enum(icon)
         else:
             self.__icon = icon
