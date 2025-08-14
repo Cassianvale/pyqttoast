@@ -731,9 +731,9 @@ class Toast(QDialog):
         effective_direction = self.__get_effective_animation_direction()
 
         if effective_direction == ToastAnimationDirection.FROM_TOP:
-            return target_x, target_y + int(self.height() / 1.5) + predecessor_offset
-        elif effective_direction == ToastAnimationDirection.FROM_BOTTOM:
             return target_x, target_y - int(self.height() / 1.5) - predecessor_offset
+        elif effective_direction == ToastAnimationDirection.FROM_BOTTOM:
+            return target_x, target_y + int(self.height() / 1.5) + predecessor_offset
         elif effective_direction == ToastAnimationDirection.FROM_LEFT:
             return target_x - int(self.width() / 1.5) - predecessor_offset, target_y
         elif effective_direction == ToastAnimationDirection.FROM_RIGHT:
@@ -775,9 +775,9 @@ class Toast(QDialog):
         effective_direction = self.__get_effective_animation_direction()
 
         if effective_direction == ToastAnimationDirection.FROM_TOP:
-            return current_x, current_y + int(self.height() / 1.5)
-        elif effective_direction == ToastAnimationDirection.FROM_BOTTOM:
             return current_x, current_y - int(self.height() / 1.5)
+        elif effective_direction == ToastAnimationDirection.FROM_BOTTOM:
+            return current_x, current_y + int(self.height() / 1.5)
         elif effective_direction == ToastAnimationDirection.FROM_LEFT:
             return current_x - int(self.width() / 1.5), current_y
         elif effective_direction == ToastAnimationDirection.FROM_RIGHT:
