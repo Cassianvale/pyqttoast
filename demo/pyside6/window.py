@@ -35,7 +35,7 @@ class Window(QMainWindow):
 
         # Window settings - Increased size for enhanced features
         self.setFixedSize(1200, 900)
-        self.setWindowTitle(self.language_manager.get_text("window_title"))
+        self.setWindowTitle("PyQt Toast Demo")
 
         # Create UI layout
         self._setup_ui()

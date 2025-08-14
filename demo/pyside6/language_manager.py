@@ -22,10 +22,6 @@ class LanguageManager:
         self.current_language = Language.ENGLISH
         self.translations = {
             # Window and group titles
-            "window_title": {
-                Language.CHINESE: "Enhanced PySide6 Toast Demo - Manual & Automatic Progress",
-                Language.ENGLISH: "Enhanced PySide6 Toast Demo - Manual & Automatic Progress"
-            },
             "static_settings": {Language.CHINESE: "静态设置", Language.ENGLISH: "Static Settings"},
             "toast_presets": {Language.CHINESE: "Toast 预设", Language.ENGLISH: "Toast Presets"},
             "custom_toast": {Language.CHINESE: "自定义 Toast", Language.ENGLISH: "Custom Toast"},
