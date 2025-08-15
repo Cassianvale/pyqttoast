@@ -212,6 +212,7 @@ class Toast(QDialog):
         self.__text_label = QLabel(self.__toast_widget)
         self.__text_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
         self.__text_label.setOpenExternalLinks(True)
+        self.__text_label.setTextFormat(Qt.TextFormat.RichText)
 
         # Icon (QPushButton instead of QLabel to get better icon quality)
         self.__icon_widget = QPushButton(self.__toast_widget)

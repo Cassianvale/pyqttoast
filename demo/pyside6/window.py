@@ -856,13 +856,14 @@ class Window(QMainWindow):
         self.text_font_size_spinbox.setValue(16)
 
     def test_clickable_links(self):
-        """Test clickable links functionality using all custom toast settings"""
+        """Test clickable links functionality using Qt's built-in TextBrowserInteraction"""
         toast = Toast(self)
 
         # Use custom toast settings for duration, title, and special text for links
         toast.setDuration(self.duration_spinbox.value())
-        toast.setTitle("Clickable Links Test")
-        toast.setText("Click to test: https://www.google.com and www.github.com are clickable links!")
+        toast.setTitle("Clickable Links Demo")
+        toast.setText("URLs Test! Try these:\n"
+                    "HTML: <a href='https://www.example.com'>Click here</a>")
 
         # Apply all custom toast settings using the helper method
         self._apply_custom_toast_settings(toast)
