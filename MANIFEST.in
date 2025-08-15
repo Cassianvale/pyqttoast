@@ -1,0 +1,30 @@
+# Include the README and license files
+include README.md
+include README_CN.md
+include LICENSE
+include requirements.txt
+include pytest.ini
+
+# Include all CSS files
+recursive-include src/pyqttoast/css *.css
+
+# Include all icon files
+recursive-include src/pyqttoast/icons *.png
+
+# Include hook files
+recursive-include src/pyqttoast/hooks *.py
+
+# Include documentation
+recursive-include docs *.md
+
+# Include demo files
+recursive-include demo *.py
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude *~
+global-exclude __pycache__
+global-exclude .git*
+global-exclude .DS_Store
+global-exclude *.egg-info

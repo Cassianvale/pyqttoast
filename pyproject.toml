@@ -1,0 +1,75 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyqt-toast-enhanced"
+version = "1.4.0"
+authors = [
+    {name = "CassianVale", email = "cassianvale4890@linux.do"},
+]
+description = "Enhanced fork of pyqt-toast-notification with additional features and improvements"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+keywords = ["python", "pyqt", "qt", "toast", "notification", "enhanced", "fork"]
+dependencies = [
+    "QtPy>=2.4.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/Cassianvale/pyqttoast"
+Documentation = "https://github.com/Cassianvale/pyqttoast/blob/main/README.md"
+Repository = "https://github.com/Cassianvale/pyqttoast"
+"Bug Reports" = "https://github.com/Cassianvale/pyqttoast/issues"
+"Original Project" = "https://github.com/niklashenning/pyqttoast"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-qt>=4.0",
+    "black",
+    "flake8",
+    "mypy",
+]
+test = [
+    "pytest>=6.0",
+    "pytest-qt>=4.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"pyqttoast.css" = ["*.css"]
+"pyqttoast.icons" = ["*.png"]
+"pyqttoast.hooks" = ["*.py"]
+
+[project.entry-points.pyinstaller40]
+hook-dirs = "pyqttoast.hooks:get_hook_dirs"
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]

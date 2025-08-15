@@ -4,15 +4,18 @@
 
 <img src="https://socialify.git.ci/Cassianvale/pyqttoast/image?font=Source+Code+Pro&language=1&name=1&pattern=Diagonal+Stripes&theme=Auto" alt="pyqttoast" width="640" height="320" />
 
-[![PyPI](https://img.shields.io/badge/pypi-v1.3.3-blue)](https://pypi.org/project/pyqt-toast-notification/)
-[![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/niklashenning/pyqttoast)
-[![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/niklashenning/pyqttoast)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-green)](https://github.com/niklashenning/pyqttoast)
-[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/niklashenning/pyqttoast/blob/master/LICENSE)
+[![PyPI](https://img.shields.io/badge/pypi-v1.4.0-blue)](https://pypi.org/project/pyqt-toast-enhanced/)
+[![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/Cassianvale/pyqttoast)
+[![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/Cassianvale/pyqttoast)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-green)](https://github.com/Cassianvale/pyqttoast)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/Cassianvale/pyqttoast/blob/master/LICENSE)
 
 **Language:** ➡️*English* | [中文](README_CN.md)
 
-A fully customizable and modern toast notification library for PyQt and PySide
+An enhanced fork of pyqt-toast-notification with additional features and improvements
+
+> **Note**: This is an enhanced fork of the original [pyqt-toast-notification](https://github.com/niklashenning/pyqttoast) by Niklas Henning.
+> All credit for the original work goes to the original author.
 
 </div>
 
@@ -31,14 +34,24 @@ A fully customizable and modern toast notification library for PyQt and PySide
 
 ## Installation
 
+### Enhanced Version (This Fork)
+Install the enhanced version with additional features:
+```bash
+pip install pyqt-toast-enhanced
+```
+
 ### Original Version (Stable)
 If you want to use the original author's stable version:
 ```bash
 pip install pyqt-toast-notification
 ```
 
-### This Project Version (Enhanced)
-This project is a fork of the original with additional features and improvements. To use this version:
+### Development Installation
+For development or to get the latest features:
+```bash
+git clone https://github.com/Cassianvale/pyqttoast.git
+cd pyqttoast
+pip install -e .
 
 1. **Clone this repository:**
 ```bash
