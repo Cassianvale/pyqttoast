@@ -4,15 +4,18 @@
 
 <img src="https://socialify.git.ci/Cassianvale/pyqttoast/image?font=Source+Code+Pro&language=1&name=1&pattern=Diagonal+Stripes&theme=Auto" alt="pyqttoast" width="640" height="320" />
 
-[![PyPI](https://img.shields.io/badge/pypi-v1.3.3-blue)](https://pypi.org/project/pyqt-toast-notification/)
-[![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/niklashenning/pyqttoast)
-[![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/niklashenning/pyqttoast)
-[![Coverage](https://img.shields.io/badge/coverage-94%25-green)](https://github.com/niklashenning/pyqttoast)
-[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/niklashenning/pyqttoast/blob/master/LICENSE)
+[![PyPI](https://img.shields.io/badge/pypi-v2.0.0-blue)](https://pypi.org/project/pyqttoast-enhanced/)
+[![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/Cassianvale/pyqttoast)
+[![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/Cassianvale/pyqttoast)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-green)](https://github.com/Cassianvale/pyqttoast)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/Cassianvale/pyqttoast/blob/master/LICENSE)
 
 **语言:** [English](README.md) | ➡️*中文*
 
-一个完全可定制的现代化 PyQt 和 PySide 通知库
+一个增强版的 pyqt-toast-notification fork，包含额外功能和改进
+
+> **注意**: 这是原始 [pyqt-toast-notification](https://github.com/niklashenning/pyqttoast) 项目的增强版 fork，由 Niklas Henning 开发。
+> 所有原始工作的功劳归于原作者。
 
 </div>
 
@@ -31,37 +34,30 @@
 
 ## 安装
 
+### 增强版本（本 Fork）
+安装包含额外功能的增强版本：
+```bash
+pip install pyqttoast-enhanced
+```
+
 ### 原作者版本（稳定版）
 如果您想使用原作者的稳定版本：
 ```bash
 pip install pyqt-toast-notification
 ```
 
-### 本项目版本（增强版）
-本项目是原作者项目的fork版本，包含了额外的功能和改进。要使用本版本：
-
-1. **克隆本仓库：**
+### 开发安装
+用于开发或获取最新功能：
 ```bash
 git clone https://github.com/Cassianvale/pyqttoast.git
 cd pyqttoast
-```
-
-2. **安装依赖：**
-```bash
-pip install -r requirements.txt
-```
-
-3. **以开发模式安装：**
-```bash
 pip install -e .
 ```
 
 4. **或者直接运行而不安装：**
 ```python
-# 将项目根目录添加到 Python 路径
-import sys
-sys.path.insert(0, '/path/to/pyqttoast')
-from src.pyqttoast import Toast, ToastPreset
+# 如果使用开发安装，直接导入
+from pyqttoast import Toast, ToastPreset
 ```
 
 > **注意：** 本项目包含现代边距API、性能优化和其他增强功能，这些在原版本中不可用。
@@ -307,4 +303,7 @@ coverage report --ignore-errors -m
 ```
 
 ## 许可证
-此软件根据 [MIT 许可证](https://github.com/niklashenning/pyqttoast/blob/master/LICENSE) 授权。
+此软件根据 [MIT 许可证](https://github.com/Cassianvale/pyqttoast/blob/master/LICENSE) 授权。
+
+## 致谢
+本项目是 [pyqt-toast-notification](https://github.com/niklashenning/pyqttoast) 的增强版 fork，原作者为 Niklas Henning。感谢原作者的出色工作！
