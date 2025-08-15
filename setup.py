@@ -5,8 +5,8 @@ with open('README.md', 'r', encoding='utf-8') as fh:
     readme = '\n' + fh.read()
 
 setup(
-    name='pyqt-toast-enhanced',
-    version='1.4.0',
+    name='pyqttoast-enhanced',
+    version='2.0.0',
     author='CassianVale',
     author_email='z1430066373@gmail.com',
     license='MIT',

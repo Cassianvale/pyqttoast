@@ -129,7 +129,7 @@ def main():
         upload_to_testpypi()
         print("\nPackage uploaded to TestPyPI successfully!")
         print("You can install it with:")
-        print("pip install --index-url https://test.pypi.org/simple/ pyqt-toast-enhanced")
+        print("pip install --index-url https://test.pypi.org/simple/ pyqttoast-enhanced")
     else:
         print("\nUploading to PyPI...")
         response = input("Are you sure you want to upload to PyPI? (y/N): ")
@@ -137,7 +137,7 @@ def main():
             upload_to_pypi()
             print("\nPackage uploaded to PyPI successfully!")
             print("You can install it with:")
-            print("pip install pyqt-toast-enhanced")
+            print("pip install pyqttoast-enhanced")
         else:
             print("Upload cancelled.")
 

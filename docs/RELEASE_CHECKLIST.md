@@ -30,13 +30,13 @@
 ```bash
 pip install build twine
 python publish.py --test
-pip install --index-url https://test.pypi.org/simple/ pyqt-toast-enhanced
+pip install --index-url https://test.pypi.org/simple/ pyqttoast-enhanced
 ```
 
 ### Production Release
 ```bash
 python publish.py
-pip install pyqt-toast-enhanced
+pip install pyqttoast-enhanced
 ```
 
 ### Post-Release

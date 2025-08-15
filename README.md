@@ -4,7 +4,7 @@
 
 <img src="https://socialify.git.ci/Cassianvale/pyqttoast/image?font=Source+Code+Pro&language=1&name=1&pattern=Diagonal+Stripes&theme=Auto" alt="pyqttoast" width="640" height="320" />
 
-[![PyPI](https://img.shields.io/badge/pypi-v1.4.0-blue)](https://pypi.org/project/pyqt-toast-enhanced/)
+[![PyPI](https://img.shields.io/badge/pypi-v2.0.0-blue)](https://pypi.org/project/pyqttoast-enhanced/)
 [![Python](https://img.shields.io/badge/python-3.7+-blue)](https://github.com/Cassianvale/pyqttoast)
 [![Build](https://img.shields.io/badge/build-passing-neon)](https://github.com/Cassianvale/pyqttoast)
 [![Coverage](https://img.shields.io/badge/coverage-94%25-green)](https://github.com/Cassianvale/pyqttoast)
@@ -37,7 +37,7 @@ An enhanced fork of pyqt-toast-notification with additional features and improve
 ### Enhanced Version (This Fork)
 Install the enhanced version with additional features:
 ```bash
-pip install pyqt-toast-enhanced
+pip install pyqttoast-enhanced
 ```
 
 ### Original Version (Stable)

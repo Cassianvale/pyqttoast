@@ -3,10 +3,10 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pyqt-toast-enhanced"
-version = "1.4.0"
+name = "pyqttoast-enhanced"
+version = "2.0.0"
 authors = [
-    {name = "CassianVale", email = "cassianvale4890@linux.do"},
+    {name = "CassianVale", email = "z1430066373@gmail.com"},
 ]
 description = "Enhanced fork of pyqt-toast-notification with additional features and improvements"
 readme = "README.md"
