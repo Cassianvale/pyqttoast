@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import math
-import re
-import webbrowser
 from qtpy.QtGui import QGuiApplication, QScreen
 from qtpy.QtCore import Qt, QPropertyAnimation, QPoint, QTimer, QSize, QMargins, QRect, Signal
 from qtpy.QtGui import QPixmap, QIcon, QFont, QFontMetrics
@@ -97,60 +95,6 @@ class MarginManager:
 
         attr_name = self._margin_attrs[margin_type]
         setattr(self.toast, attr_name, new_margins)
-
-
-class ClickableLabel(QLabel):
-    """A QLabel that supports clickable links"""
-
-    # Class-level compiled regex pattern for better performance
-    _URL_PATTERN = re.compile(
-        r'(?i)\b(?:'
-        r'(?:https?://|www\.)'  # http://, https://, or www.
-        r'(?:[^\s<>"{}|\\^`\[\]]*)'  # domain and path
-        r'|'
-        r'(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}'  # domain.tld
-        r'(?:/[^\s<>"{}|\\^`\[\]]*)?'  # optional path
-        r')\b'
-    )
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setOpenExternalLinks(True)
-        self.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
-        self.linkActivated.connect(self._open_link)
-
-    def _open_link(self, url):
-        """Open the clicked link in the default browser"""
-        try:
-            webbrowser.open(url)
-        except Exception:
-            # Fallback if webbrowser fails
-            pass
-
-    def setText(self, text):
-        """Set text and automatically convert URLs to clickable links"""
-        # Convert plain URLs to HTML links
-        linked_text = self._convert_urls_to_links(text)
-        super().setText(linked_text)
-
-    def _convert_urls_to_links(self, text):
-        """Convert URLs in text to HTML links"""
-
-        def replace_url(match):
-            url = match.group(0)
-            # Add protocol if missing
-            if not url.startswith(('http://', 'https://')):
-                if url.startswith('www.'):
-                    full_url = 'https://' + url
-                else:
-                    full_url = 'https://' + url
-            else:
-                full_url = url
-
-            return f'<a href="{full_url}" style="color: #0066cc; text-decoration: underline;">{url}</a>'
-
-        # Replace URLs with HTML links using the class-level compiled pattern
-        return self._URL_PATTERN.sub(replace_url, text)
 
 
 class Toast(QDialog):
@@ -262,8 +206,11 @@ class Toast(QDialog):
         # Title label
         self.__title_label = QLabel(self.__toast_widget)
 
-        # Text label (using ClickableLabel for link support)
-        self.__text_label = ClickableLabel(self.__toast_widget)
+        # Text label
+        self.__text_label = QLabel(self.__toast_widget)
+        self.__text_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        self.__text_label.setOpenExternalLinks(True)
+        self.__text_label.setTextFormat(Qt.TextFormat.RichText)
 
         # Icon (QPushButton instead of QLabel to get better icon quality)
         self.__icon_widget = QPushButton(self.__toast_widget)

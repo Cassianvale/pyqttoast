@@ -95,8 +95,10 @@ class LanguageManager:
             "test_clickable_links": {Language.CHINESE: "测试可点击链接", Language.ENGLISH: "Test Clickable Links"},
             "clickable_links_title": {Language.CHINESE: "可点击链接测试", Language.ENGLISH: "Clickable Links Test"},
             "clickable_links_text": {
-                Language.CHINESE: "点击链接测试：https://www.google.com 和 www.github.com 可以直接访问！",
-                Language.ENGLISH: "Click to test: https://www.google.com and www.github.com are clickable links!"
+                Language.CHINESE: "URLs Test! Try these:\n"
+                    "HTML: <a href='https://www.example.com'>Click here</a>",
+                Language.ENGLISH: "URLs Test! Try these:\n"
+                    "HTML: <a href='https://www.example.com'>Click here</a>"
             },
 
             # Close button positions
